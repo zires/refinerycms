@@ -33,6 +33,8 @@ gem 'refinerycms',              :path => '.'
 
 gem 'friendly_id',              :git => 'git://github.com/parndt/friendly_id', :branch => 'globalize3'
 
+gem 'mime-types', :require => 'mime/types'
+
 # Specify additional Refinery CMS Engines here (all optional):
 gem 'refinerycms-generators',   '~> 0.9.9', :git => 'git://github.com/resolve/refinerycms-generators.git'
 # gem 'refinerycms-inquiries',    '~> 0.9.9.9'
