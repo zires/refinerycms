@@ -1,3 +1,71 @@
+<%# load Uploadify libraries, etc. %>
+<% content_for :stylesheets do %>
+  <%= stylesheet_link_tag '/uploadify/uploadify.css' %>
+<% end %>
+<% content_for :javascripts do %>
+  <%= javascript_include_tag '/uploadify/swfobject.js' %>
+  <%= javascript_include_tag '/uploadify/jquery.uploadify.v2.1.4.min.js' %>
+
+  <script type="text/javascript">
+  <%- session_key = Rails.application.config.session_options[:key] -%>
+  $(function () {
+    // Create an empty object to store our custom script data
+    var uploadify_script_data = {};
+   
+    // Fetch the CSRF meta tag data
+    var csrf_token = $('meta[name=csrf-token]').attr('content');
+    var csrf_param = $('meta[name=csrf-param]').attr('content');
+
+    // Now associate the data in the config, encoding the data safely
+    uploadify_script_data[csrf_param] = encodeURIComponent(csrf_token);
+
+    // Associate the session information
+    uploadify_script_data["<%= u session_key %>"] = "<%= u cookies[session_key] %>"; 
+
+    <% if @app_dialog -%>
+      uploadify_script_data['app_dialog'] = '<%= @app_dialog %>';
+      uploadify_script_data['field'] = '<%= @field %>';
+      uploadify_script_data['update_resource'] = '<%= @update_resource %>';
+      uploadify_script_data['update_text'] = '<%= @update_text %>';
+      uploadify_script_data['thumbnail'] = '<%= @thumbnail %>';
+      uploadify_script_data['callback'] = '<%= @callback %>';
+      uploadify_script_data['conditions'] = '<%= @conditions %>';
+      uploadify_script_data['current_link'] = '<%= @current_link %>';
+    <% end -%>
+
+    // DEBUG
+    console.debug(uploadify_script_data);
+
+     // Configure Uploadify
+    $('#resource_file').uploadify({
+      'uploader' : '/uploadify/uploadify.swf',
+      'script' : '<%= @url_override %>',
+      'cancelImg' : '/uploadify/cancel.png',
+      'scriptData' : uploadify_script_data,
+      'fileDataName' : 'resource[file]',
+      'fileExt' : '*.jpg;*.gif;*.png;*.mp3;*.mp2;*.m4a;*.ogg',
+      //'fileDesc' : 'Please select a file to upload',
+      //'sizeLimit' :   // size in bytes
+      //'auto': true,
+      'onComplete' : function(event, ID, fileObj, response, data) {
+          <%# if @app_dialog or action_name == "insert" or from_dialog? %>
+          <% if action_name == "insert" %>
+            window.location = '<%= insert_admin_resources_url({:dialog => true, :app_dialog => true, :update_resource => @update_resource, :update_text => @update_text, :callback => @callback, :field => @field }) %>';
+          <% elsif action_name == 'new' %>
+            parent.window.location = '<%= admin_resources_url %>'
+          <% end %>
+        }
+    });
+  });
+
+  // hook into submit button and make it trigger upload
+  $('#new_resource').submit(function() {
+    $('#resource_file').uploadifyUpload();
+    return false;
+  });
+  </script>
+<% end %>
+
 <%= form_for [:admin, @resource], :url => @url_override || @url,
                                   :html => {:multipart => true} do |f| -%>
 

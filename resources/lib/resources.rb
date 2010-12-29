@@ -42,6 +42,20 @@ module Refinery
         }
       end
 
+      ### For Uploadify ###
+      # Thanks to Damian Galarza for his helpful guides:
+      # http://www.glrzad.com/ruby-on-rails/using-uploadify-with-rails-3/
+      initializer "resources-with-uploadify" do |app|
+        app.config.autoload_paths += %W( #{config.root}/app/middleware )
+        app.middleware.insert_after ::ActionDispatch::Static, ::ActionDispatch::Static, "#{root}/public"
+        app.config.middleware.insert_before(
+          ActionDispatch::Session::CookieStore,
+          FlashSessionCookieMiddleware,
+          app.config.session_options[:key]
+        )
+      end
+      ### End For Uploadify ###
+
       config.after_initialize do
         Refinery::Plugin.register do |plugin|
           plugin.name = "refinery_files"
