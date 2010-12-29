@@ -44,9 +44,9 @@
       'scriptData' : uploadify_script_data,
       'fileDataName' : 'resource[file]',
       'fileExt' : '*.jpg;*.gif;*.png;*.mp3;*.mp2;*.m4a;*.ogg',
-      //'fileDesc' : 'Please select a file to upload',
-      //'sizeLimit' :   // size in bytes
+      'sizeLimit' : <%= Resource::MAX_SIZE_IN_MB * 1024 * 1024 %>, // size in bytes
       //'auto': true,
+      //'fileDesc' : 'Please select a file to upload',
       'onComplete' : function(event, ID, fileObj, response, data) {
           <%# if @app_dialog or action_name == "insert" or from_dialog? %>
           <% if action_name == "insert" %>
