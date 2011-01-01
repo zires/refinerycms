@@ -73,6 +73,7 @@ PATH
       dragonfly (~> 0.8.1)
       friendly_id (~> 3.1.8)
       globalize3
+      mime-types
       moretea-awesome_nested_set (= 1.4.3.1)
       rack-cache (~> 0.5.2)
       rails (~> 3.0.3)
