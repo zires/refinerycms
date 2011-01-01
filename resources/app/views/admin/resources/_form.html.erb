@@ -7,7 +7,6 @@
   <%= javascript_include_tag '/uploadify/jquery.uploadify.v2.1.4.min.js' %>
 
   <script type="text/javascript">
-  <%- session_key = Rails.application.config.session_options[:key] -%>
   $(function () {
     // Create an empty object to store our custom script data
     var uploadify_script_data = {};
@@ -18,8 +17,10 @@
 
     // Now associate the data in the config, encoding the data safely
     uploadify_script_data[csrf_param] = encodeURI(encodeURIComponent(csrf_token));
+    uploadify_script_data['uploadify'] = true;
 
     // Associate the session information
+    <%- session_key = Rails.application.config.session_options[:key] -%>
     uploadify_script_data["<%= u session_key %>"] = "<%= u cookies[session_key] %>"; 
 
     <% if @app_dialog -%>
@@ -33,13 +34,19 @@
       uploadify_script_data['current_link'] = '<%= @current_link %>';
     <% end -%>
 
+    <% if action_name == 'edit' %>
+      uploadify_script_data['_method'] = 'put'
+    <% end %>
+
     // DEBUG
-    console.debug(uploadify_script_data);
+    if (window.console) {
+      console.debug(uploadify_script_data);
+    }
 
      // Configure Uploadify
     $('#resource_file').uploadify({
       'uploader' : '/uploadify/uploadify.swf',
-      'script' : '<%= @url_override %>',
+      'script' : '<%= @url_override || @url || url_for([:admin, @resource]) %>',
       'cancelImg' : '/uploadify/cancel.png',
       'scriptData' : uploadify_script_data,
       'fileDataName' : 'resource[file]',
@@ -48,21 +55,28 @@
       //'auto': true,
       //'fileDesc' : 'Please select a file to upload',
       'onComplete' : function(event, ID, fileObj, response, data) {
-          <%# if @app_dialog or action_name == "insert" or from_dialog? %>
           <% if action_name == "insert" %>
             window.location = '<%= insert_admin_resources_url({:dialog => true, :app_dialog => true, :update_resource => @update_resource, :update_text => @update_text, :callback => @callback, :field => @field }) %>';
           <% elsif action_name == 'new' %>
             parent.window.location = '<%= admin_resources_url %>'
+          <% elsif action_name == 'edit' %>
+            window.location = '<%= admin_resources_url %>'
           <% end %>
+        },
+        'onError' : function(event,ID,fileObj,errorObj) {
+          $('.save-loader').remove();
         }
     });
   });
 
   // hook into submit button and make it trigger upload
-  $('#new_resource').submit(function() {
+  function submit_override() {
     $('#resource_file').uploadifyUpload();
     return false;
-  });
+  }
+  $('#new_resource').submit(submit_override);
+  $('.edit_resource').submit(submit_override);
+  
   </script>
 <% end %>
 
