@@ -114,7 +114,7 @@ module Refinery
       # and then join to the pages table again to return the associated record.
       def by_slug(slug, conditions={})
         with_globalize({
-          :locale => Refinery::I18n.frontend_locales.map(&:to_s),
+          :locale => [Refinery::I18n.frontend_locales.map(&:to_s), 'en'],
           :slug => slug
         }.merge(conditions))
       end
